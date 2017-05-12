@@ -60,7 +60,7 @@ def xmlrpc_return(start_response, service, method, params, string_faultcode=Fals
             response = xmlrpc_handle_exception_string(e)
         else:
             response = xmlrpc_handle_exception_int(e)
-    start_response("200 OK", [('Content-Type','text/xml'), ('Content-Length', str(len(response)))])
+    start_response("200 OK", [('Content-Type','text/xml'), ('Content-Length', str(len(response)), ('Access-Control-Allow-Origin','*'))])
     return [response]
 
 def xmlrpc_handle_exception_int(e):
@@ -137,6 +137,16 @@ def wsgi_xmlrpc(environ, start_response):
     /xmlrpc/2/<service> is a new route that returns faultCode as int and is
     therefore fully compliant.
     """
+    if environ['REQUEST_METHOD'] == "OPTIONS":
+        response = werkzeug.wrappers.Response('OPTIONS METHOD DETECTED')
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
+        response.headers['Access-Control-Max-Age'] = 1000
+        # note that '*' is not valid for Access-Control-Allow-Headers
+        response.headers['Access-Control-Allow-Headers'] = 'origin, x-csrftoken, content-type, accept'
+
+        return response(environ, start_response)
+        
     if environ['REQUEST_METHOD'] == 'POST' and environ['PATH_INFO'].startswith('/xmlrpc/'):
         length = int(environ['CONTENT_LENGTH'])
         data = environ['wsgi.input'].read(length)
@@ -174,7 +184,7 @@ def application_unproxied(environ, start_response):
 
     # We never returned from the loop.
     response = 'No handler found.\n'
-    start_response('404 Not Found', [('Content-Type', 'text/plain'), ('Content-Length', str(len(response)))])
+    start_response('404 Not Found', [('Content-Type', 'text/plain'), ('Content-Length', str(len(response)), ('Access-Control-Allow-Origin','*'))])
     return [response]
 
 def application(environ, start_response):
