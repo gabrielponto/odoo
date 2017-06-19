@@ -60,7 +60,7 @@ def xmlrpc_return(start_response, service, method, params, string_faultcode=Fals
             response = xmlrpc_handle_exception_string(e)
         else:
             response = xmlrpc_handle_exception_int(e)
-    start_response("200 OK", [('Content-Type','text/xml'), ('Content-Length', str(len(response)), ('Access-Control-Allow-Origin','*'))])
+    start_response("200 OK", [('Content-Type','text/xml'), ('Content-Length', str(len(response))), ('Access-Control-Allow-Origin','*')])
     return [response]
 
 def xmlrpc_handle_exception_int(e):
